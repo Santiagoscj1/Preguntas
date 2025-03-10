@@ -66,10 +66,10 @@ async def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_callback))
 
-    # Ejecutar el bot en el bucle de eventos ya activo de Render
+    # Aquí no se necesita asyncio.run() porque Render ya gestiona el ciclo de eventos
     await application.run_polling()
 
 if __name__ == "__main__":
     import asyncio
-    # Usar `asyncio.create_task` en lugar de `asyncio.run` para evitar el error de "event loop already running"
-    asyncio.create_task(main())
+    # Ejecutar main sin asyncio.run, ya que Render ya maneja el ciclo de eventos
+    asyncio.run(main())
