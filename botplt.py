@@ -67,11 +67,8 @@ def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_callback))
 
-    # Especificar el puerto (Render requiere esto)
-    port = os.getenv("PORT", 80)
-
-    # Usar run_polling sin cerrar el bucle de eventos explícitamente
-    application.run_polling(port=port)
+    # Ejecutar el bot sin pasar el puerto, ya que esto se maneja por Render
+    application.run_polling()
 
 # Ejecutar main directamente sin asyncio.run
 if __name__ == "__main__":
