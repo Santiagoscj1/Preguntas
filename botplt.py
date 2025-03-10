@@ -66,11 +66,10 @@ async def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_callback))
 
-    # Aquí no se necesita asyncio.run() porque Render ya gestiona el ciclo de eventos
+    # Ejecutamos el bot sin necesidad de asyncio.run()
     await application.run_polling()
 
-# Ejecutar main sin asyncio.run, ya que Render ya maneja el ciclo de eventos
+# Ejecutar main directamente, sin asyncio.create_task
 if __name__ == "__main__":
     import asyncio
-    # Solo ejecutar main directamente
-    asyncio.create_task(main())  # Utilizamos create_task en lugar de run()
+    asyncio.run(main())  # Ejecutamos main aquí, y no crear una tarea adicional
