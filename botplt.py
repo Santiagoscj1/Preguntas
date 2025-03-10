@@ -1,5 +1,5 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, Application
+from telegram.ext import CommandHandler, CallbackQueryHandler, CallbackContext, Application
 
 # TOKEN de tu bot de Telegram (reemplázalo con el tuyo)
 TOKEN = "7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M"
@@ -66,9 +66,12 @@ async def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_callback))
 
+    # Ejecutar el bot en el bucle de eventos ya activo de Render
     await application.run_polling()
 
 if __name__ == "__main__":
     import asyncio
-    asyncio.run(main())
+    # Usar `asyncio.create_task` en lugar de `asyncio.run` para evitar el error de "event loop already running"
+    asyncio.create_task(main())
+)
 
