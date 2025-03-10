@@ -1,6 +1,4 @@
 import logging
-import threading
-from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, CallbackContext
 
@@ -70,28 +68,15 @@ def button_callback(update: Update, context: CallbackContext) -> None:
 def error_handler(update: Update, context: CallbackContext):
     logger.error(f"Ocurrió un error: {context.error}")
 
-# Health check para Render
-app = Flask(__name__)
-
-@app.route('/health')
-def health_check():
-    return "OK", 200
-
-def start_flask():
-    """Inicia un servidor Flask para el health check en Render."""
-    app.run(host="0.0.0.0", port=8080)
-
 # Configuración del bot
 def main():
     app = Application.builder().token(TOKEN).build()
     
+    # Añadir manejadores
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_callback))
     app.add_error_handler(error_handler)
     
-    # Ejecutar Flask en un hilo separado para evitar que bloquee el bot
-    threading.Thread(target=start_flask, daemon=True).start()
-
     # Iniciar el bot con polling
     app.run_polling()
 
