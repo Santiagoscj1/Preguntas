@@ -1,40 +1,16 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
- 
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, CallbackContext
+
 # TOKEN de tu bot de Telegram (reemplázalo con el tuyo)
 TOKEN = "7718095588:AAGvIV1uii8L1etfbIq8gQnIOFyy3dMBin8"
 
-# Lista de preguntas y respuestas (corregida con comas faltantes)
+# Lista de preguntas y respuestas
 questions = [
-    {"question": "¿Cuál es el propósito principal de la donación de plaquetas?", 
-     "options": [("Ayudar a pacientes con enfermedades", "incorrecto"), 
-                 ("Ayudar a pacientes con enfermedades hematológicas", "correcto"), 
-                 ("Ayudar a pacientes con enfermedades respiratorias", "incorrecto"), 
-                 ("Ayudar a pacientes con enfermedades digestivas", "incorrecto")]},
-
-    {"question": "¿Quién puede donar plaquetas?", 
-     "options": [("Personas de cualquier edad", "incorrecto"), 
-                 ("Personas entre 18 y 60 años", "correcto"), 
-                 ("Personas mayores de 60 años", "incorrecto"), 
-                 ("Personas menores de 18 años", "incorrecto")]},
-
-    {"question": "¿Cuánto tiempo dura la donación de plaquetas?", 
-     "options": [("30 minutos", "incorrecto"), 
-                 ("1-2 horas", "correcto"), 
-                 ("3-4 horas", "incorrecto"), 
-                 ("5-6 horas", "incorrecto")]},
-
-    {"question": "¿Qué es el proceso de separación de las plaquetas de la sangre?", 
-     "options": [("Diálisis", "incorrecto"), 
-                 ("Aféresis", "correcto"), 
-                 ("Transfusión", "incorrecto"), 
-                 ("Infusión", "incorrecto")]},
-
-    {"question": "¿Por qué es importante donar plaquetas?", 
-     "options": [("Para ayudar a pacientes con enfermedades cardíacas", "incorrecto"), 
-                 ("Para ayudar a pacientes con enfermedades hematológicas", "correcto"), 
-                 ("Para ayudar a pacientes con enfermedades respiratorias", "incorrecto"), 
-                 ("Para ayudar a pacientes con enfermedades digestivas", "incorrecto")]}
+    {"question": "¿Cuál es el propósito principal de la donación de plaquetas?", "options": [("Ayudar a pacientes con enfermedades", "incorrecto"), ("Ayudar a pacientes con enfermedades hematológicas", "correcto"), ("Ayudar a pacientes con enfermedades respiratorias", "incorrecto"), ("Ayudar a pacientes con enfermedades digestivas", "incorrecto")]},
+    {"question": "¿Quién puede donar plaquetas?", "options": [("Personas de cualquier edad", "incorrecto"), ("Personas entre 18 y 60 años", "correcto"), ("Personas mayores de 60 años", "incorrecto"), ("Personas menores de 18 años", "incorrecto")]},
+    {"question": "¿Cuánto tiempo dura la donación de plaquetas?", "options": [("30 minutos", "incorrecto"), ("1-2 horas", "correcto"), ("3-4 horas", "incorrecto"), ("5-6 horas", "incorrecto")]},
+    {"question": "¿Qué es el proceso de separación de las plaquetas de la sangre?", "options": [("Diálisis", "incorrecto"), ("Aféresis", "correcto"), ("Transfusión", "incorrecto"), ("Infusión", "incorrecto")]} ,
+    {"question": "¿Por qué es importante donar plaquetas?", "options": [("Para ayudar a pacientes con enfermedades cardíacas", "incorrecto"), ("Para ayudar a pacientes con enfermedades hematológicas", "correcto"), ("Para ayudar a pacientes con enfermedades respiratorias", "incorrecto"), ("Para ayudar a pacientes con enfermedades digestivas", "incorrecto")]} 
 ]
 
 # Diccionario para rastrear la posición de cada usuario en el test
@@ -70,38 +46,29 @@ def button_callback(update: Update, context: CallbackContext) -> None:
         query.answer("Por favor, usa /start para comenzar el examen.")
         return
 
-    # Verificar si la respuesta es correcta
-    selected_answer = query.data
-    is_correct = selected_answer == "correcto"
-
-    if is_correct:
+    if query.data == "correcto":
         user_data["score"] += 1
-        response_text = "✅ ¡Correcto!"
+        query.edit_message_text("✅ ¡Correcto!")
     else:
-        response_text = "❌ Incorrecto."
+        query.edit_message_text("❌ Incorrecto.")
 
-    query.answer()  # Cierra la notificación del botón
-
-    # Enviar nuevo mensaje en lugar de editar el existente
-    context.bot.send_message(chat_id=chat_id, text=response_text)
-
-    # Avanzar a la siguiente pregunta
-    user_data["index"] += 1  
+    user_data["index"] += 1  # Avanza a la siguiente pregunta
 
     if user_data["index"] < len(questions):
         send_question(update, context, chat_id)  # Enviar la siguiente pregunta
     else:
         context.bot.send_message(chat_id=chat_id, text=f"🎉 ¡Examen terminado! Tu puntaje es {user_data['score']} de {len(questions)}.")
 
-# Configuración del bot
 def main():
-    updater = Updater(TOKEN, use_context=True)
-    dp = updater.dispatcher
+    application = Application.builder().token(TOKEN).build()
+    
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(button_callback))
+    
+    application.run_polling()
 
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CallbackQueryHandler(button_callback))
-
-    updater.start_polling()
+if __name__ == "__main__":
+    main()
     updater.idle()
 
 if __name__ == "__main__":
