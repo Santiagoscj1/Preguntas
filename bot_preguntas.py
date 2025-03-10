@@ -1,5 +1,10 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, CallbackContext
+import logging
+
+# Configurar el registro de errores
+logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # TOKEN de tu bot de Telegram (reemplázalo con el tuyo)
 TOKEN = "7718095588:AAET-_FpY_lPgAbp33JHnaGTWQKVAqVaB2o"
@@ -9,7 +14,7 @@ questions = [
     {"question": "¿Cuál es el propósito principal de la donación de plaquetas?", "options": [("Ayudar a pacientes con enfermedades", "incorrecto"), ("Ayudar a pacientes con enfermedades hematológicas", "correcto"), ("Ayudar a pacientes con enfermedades respiratorias", "incorrecto"), ("Ayudar a pacientes con enfermedades digestivas", "incorrecto")]},
     {"question": "¿Quién puede donar plaquetas?", "options": [("Personas de cualquier edad", "incorrecto"), ("Personas entre 18 y 60 años", "correcto"), ("Personas mayores de 60 años", "incorrecto"), ("Personas menores de 18 años", "incorrecto")]},
     {"question": "¿Cuánto tiempo dura la donación de plaquetas?", "options": [("30 minutos", "incorrecto"), ("1-2 horas", "correcto"), ("3-4 horas", "incorrecto"), ("5-6 horas", "incorrecto")]},
-    {"question": "¿Qué es el proceso de separación de las plaquetas de la sangre?", "options": [("Diálisis", "incorrecto"), ("Aféresis", "correcto"), ("Transfusión", "incorrecto"), ("Infusión", "incorrecto")]} ,
+    {"question": "¿Qué es el proceso de separación de las plaquetas de la sangre?", "options": [("Diálisis", "incorrecto"), ("Aféresis", "correcto"), ("Transfusión", "incorrecto"), ("Infusión", "incorrecto")]},
     {"question": "¿Por qué es importante donar plaquetas?", "options": [("Para ayudar a pacientes con enfermedades cardíacas", "incorrecto"), ("Para ayudar a pacientes con enfermedades hematológicas", "correcto"), ("Para ayudar a pacientes con enfermedades respiratorias", "incorrecto"), ("Para ayudar a pacientes con enfermedades digestivas", "incorrecto")]} 
 ]
 
@@ -25,7 +30,7 @@ def start(update: Update, context: CallbackContext) -> None:
 def send_question(update: Update, context: CallbackContext, chat_id: int) -> None:
     """Envía la siguiente pregunta con botones de respuesta."""
     user_data = user_scores.get(chat_id)
-
+    
     if user_data["index"] >= len(questions):
         context.bot.send_message(chat_id=chat_id, text=f"🎉 ¡Examen terminado! Tu puntaje es {user_data['score']} de {len(questions)}.")
         return
@@ -55,21 +60,23 @@ def button_callback(update: Update, context: CallbackContext) -> None:
     user_data["index"] += 1  # Avanza a la siguiente pregunta
 
     if user_data["index"] < len(questions):
-        send_question(update, context, chat_id)  # Enviar la siguiente pregunta
+        send_question(query, context, chat_id)  # Enviar la siguiente pregunta
     else:
         context.bot.send_message(chat_id=chat_id, text=f"🎉 ¡Examen terminado! Tu puntaje es {user_data['score']} de {len(questions)}.")
 
-def main():
-    application = Application.builder().token(TOKEN).build()
-    
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CallbackQueryHandler(button_callback))
-    
-    application.run_polling()
+# Manejador de errores
+def error_handler(update: Update, context: CallbackContext):
+    logger.error(f"Ocurrió un error: {context.error}")
 
-if __name__ == "__main__":
-    main()
-    updater.idle()
+# Configuración del bot
+def main():
+    app = Application.builder().token(TOKEN).build()
+    
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CallbackQueryHandler(button_callback))
+    app.add_error_handler(error_handler)
+    
+    app.run_polling()
 
 if __name__ == "__main__":
     main()
