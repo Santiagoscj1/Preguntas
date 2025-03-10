@@ -2,7 +2,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, CallbackContext
 
 # TOKEN de tu bot de Telegram (reemplázalo con el tuyo)
-TOKEN = "7718095588:AAGvIV1uii8L1etfbIq8gQnIOFyy3dMBin8"
+TOKEN = "7718095588:AAET-_FpY_lPgAbp33JHnaGTWQKVAqVaB2o"
 
 # Lista de preguntas y respuestas
 questions = [
