@@ -69,7 +69,8 @@ async def main():
     # Aquí no se necesita asyncio.run() porque Render ya gestiona el ciclo de eventos
     await application.run_polling()
 
+# Ejecutar main sin asyncio.run, ya que Render ya maneja el ciclo de eventos
 if __name__ == "__main__":
     import asyncio
-    # Ejecutar main sin asyncio.run, ya que Render ya maneja el ciclo de eventos
-    asyncio.run(main())
+    # Solo ejecutar main directamente
+    asyncio.create_task(main())  # Utilizamos create_task en lugar de run()
