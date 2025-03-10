@@ -60,16 +60,15 @@ async def button_callback(update: Update, context: CallbackContext) -> None:
         await context.bot.send_message(chat_id=chat_id, text=f"🎉 ¡Examen terminado! Tu puntaje es {user_data['score']} de {len(questions)}.")
 
 # Configuración del bot
-async def main():
+def main():
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_callback))
 
-    # Ejecutamos el bot sin necesidad de asyncio.run()
-    await application.run_polling()
+    # Usar el método run_polling sin asyncio.run()
+    application.run_polling()
 
-# Ejecutar main directamente, sin asyncio.create_task
+# Ejecutar main directamente sin asyncio.run
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())  # Ejecutamos main aquí, y no crear una tarea adicional
+    main()
