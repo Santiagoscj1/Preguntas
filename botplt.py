@@ -1,5 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, CallbackQueryHandler, CallbackContext, Application
+import os
 
 # TOKEN de tu bot de Telegram (reemplázalo con el tuyo)
 TOKEN = "7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M"
@@ -66,8 +67,11 @@ def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_callback))
 
-    # Usar el método run_polling sin asyncio.run()
-    application.run_polling()
+    # Especificar el puerto (Render requiere esto)
+    port = os.getenv("PORT", 80)
+
+    # Usar run_polling sin cerrar el bucle de eventos explícitamente
+    application.run_polling(port=port)
 
 # Ejecutar main directamente sin asyncio.run
 if __name__ == "__main__":
