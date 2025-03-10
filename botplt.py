@@ -73,5 +73,3 @@ if __name__ == "__main__":
     import asyncio
     # Usar `asyncio.create_task` en lugar de `asyncio.run` para evitar el error de "event loop already running"
     asyncio.create_task(main())
-)
-
