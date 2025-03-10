@@ -1,3 +1,3 @@
-web: python botplt.py
+worker: python botplt.py
 
 
