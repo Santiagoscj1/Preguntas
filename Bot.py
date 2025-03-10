@@ -9,7 +9,7 @@ logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=lo
 logger = logging.getLogger(__name__)
 
 # TOKEN de tu bot de Telegram
-TOKEN = "7718095588:AAET-_FpY_lPgAbp33JHnaGTWQKVAqVaB2o"
+TOKEN = "7702108177:AAHLLwm7xDYwpOoLT2N46EmuYORYKr-RjQU"
 
 # Lista de preguntas y respuestas
 questions = [
