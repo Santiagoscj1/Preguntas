@@ -1,5 +1,5 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CommandHandler, CallbackQueryHandler, CallbackContext, Application
+from telegram.ext import CommandHandler, CallbackQueryHandler, CallbackContext, Application, MessageHandler, filters
 import os
 
 # TOKEN de tu bot de Telegram (reemplázalo con el tuyo)
@@ -20,7 +20,7 @@ user_scores = {}
 async def start(update: Update, context: CallbackContext) -> None:
     """Inicia el examen y envía la primera pregunta."""
     chat_id = update.message.chat_id
-    user_scores[chat_id] = {"score": 0, "index": 0} # Inicializa el puntaje y el índice de preguntas
+    user_scores[chat_id] = {"score": 0, "index": 0}  # Inicializa el puntaje y el índice de preguntas
     await send_question(update, context, chat_id)
 
 async def send_question(update: Update, context: CallbackContext, chat_id: int) -> None:
@@ -54,10 +54,10 @@ async def button_callback(update: Update, context: CallbackContext) -> None:
     else:
         await query.edit_message_text("❌ Incorrecto.")
 
-    user_data["index"] += 1 # Avanza a la siguiente pregunta
+    user_data["index"] += 1  # Avanza a la siguiente pregunta
 
     if user_data["index"] < len(questions):
-        await send_question(query, context, chat_id) # Enviar la siguiente pregunta
+        await send_question(query, context, chat_id)  # Enviar la siguiente pregunta
     else:
         # Enviar la pregunta abierta al finalizar el examen
         await context.bot.send_message(chat_id=chat_id, text=f"🎉 ¡Examen terminado! Tu puntaje es {user_data['score']} de {len(questions)}.")
@@ -82,7 +82,7 @@ def main():
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_callback))
-    application.add_handler(MessageHandler(filters.TEXT, open_answer)) # Maneja la respuesta abierta
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, open_answer))  # Maneja la respuesta abierta
 
     # Ejecutar el bot sin pasar el puerto, ya que esto se maneja por Render
     application.run_polling()
