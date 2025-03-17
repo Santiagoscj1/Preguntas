@@ -20,7 +20,7 @@ user_scores = {}
 async def start(update: Update, context: CallbackContext) -> None:
     """Inicia el examen y envía la primera pregunta."""
     chat_id = update.message.chat_id
-    user_scores[chat_id] = {"score": 0, "index": 0}  # Inicializa el puntaje y el índice de preguntas
+    user_scores[chat_id] = {"score": 0, "index": 0} # Inicializa el puntaje y el índice de preguntas
     await send_question(update, context, chat_id)
 
 async def send_question(update: Update, context: CallbackContext, chat_id: int) -> None:
@@ -28,7 +28,8 @@ async def send_question(update: Update, context: CallbackContext, chat_id: int) 
     user_data = user_scores.get(chat_id)
 
     if user_data["index"] >= len(questions):
-        await update.message.reply_text(f"🎉 ¡Examen terminado! Tu puntaje es {user_data['score']} de {len(questions)}.")
+        await update.message.reply_text(f"🎉 ¡Examen terminado! Tu puntaje es {user_data['score']} de {len(questions)}.\n\nAhora, por favor responde a esta pregunta abierta:")
+        await update.message.reply_text("¿Qué te motivó a donar plaquetas?")
         return
 
     question_data = questions[user_data["index"]]
@@ -53,12 +54,27 @@ async def button_callback(update: Update, context: CallbackContext) -> None:
     else:
         await query.edit_message_text("❌ Incorrecto.")
 
-    user_data["index"] += 1  # Avanza a la siguiente pregunta
+    user_data["index"] += 1 # Avanza a la siguiente pregunta
 
     if user_data["index"] < len(questions):
-        await send_question(query, context, chat_id)  # Enviar la siguiente pregunta
+        await send_question(query, context, chat_id) # Enviar la siguiente pregunta
     else:
+        # Enviar la pregunta abierta al finalizar el examen
         await context.bot.send_message(chat_id=chat_id, text=f"🎉 ¡Examen terminado! Tu puntaje es {user_data['score']} de {len(questions)}.")
+        await context.bot.send_message(chat_id=chat_id, text="Ahora, por favor responde a esta pregunta abierta:")
+        await context.bot.send_message(chat_id=chat_id, text="¿Qué te motivó a donar plaquetas?")
+
+async def open_answer(update: Update, context: CallbackContext) -> None:
+    """Recibe la respuesta abierta del usuario."""
+    user_data = user_scores.get(update.message.chat_id)
+    if not user_data:
+        await update.message.reply_text("Por favor, usa /start para comenzar el examen.")
+        return
+
+    # Guardar la respuesta abierta
+    open_response = update.message.text
+    # Aquí puedes guardar la respuesta a una base de datos o archivo si lo deseas
+    await update.message.reply_text(f"Gracias por tu respuesta: {open_response}\n\n¡Tu participación ha sido registrada!")
 
 # Configuración del bot
 def main():
@@ -66,6 +82,7 @@ def main():
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_callback))
+    application.add_handler(MessageHandler(filters.TEXT, open_answer)) # Maneja la respuesta abierta
 
     # Ejecutar el bot sin pasar el puerto, ya que esto se maneja por Render
     application.run_polling()
