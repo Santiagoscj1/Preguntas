@@ -3,8 +3,8 @@ from telegram.ext import CommandHandler, MessageHandler, filters, CallbackContex
 import os
 import difflib
 
-# Obtener el TOKEN desde variables de entorno (para mayor seguridad en Render)
-TOKEN = os.getenv(""7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-")
+# TOKEN del bot (No recomendado exponerlo directamente, mejor usar variables de entorno)
+TOKEN = "7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M"
 
 # Lista de preguntas y respuestas correctas
 questions = {
@@ -38,7 +38,11 @@ async def start(update: Update, context: CallbackContext) -> None:
     chat_id = update.message.chat_id
     user_scores[chat_id] = {"score": 0, "index": 0}  # Inicializa el puntaje y el índice de preguntas
 
-    greeting = "Hola, mi nombre es PlasmaBot. Bienvenido a este espacio donde yo seré tu asistente virtual y juntos resolveremos todas las dudas que tengas al respecto."
+    greeting = (
+        "Hola, mi nombre es PlasmaBot. "
+        "Bienvenido a este espacio donde yo seré tu asistente virtual "
+        "y juntos resolveremos todas las dudas que tengas al respecto."
+    )
     await update.message.reply_text(greeting)
     await send_question(update, context, chat_id)
 
