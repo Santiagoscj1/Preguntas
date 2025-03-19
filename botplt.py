@@ -3,8 +3,8 @@ from telegram.ext import CommandHandler, MessageHandler, filters, CallbackContex
 import os
 import difflib
 
-# TOKEN de tu bot de Telegram
-TOKEN = "7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M"
+# Obtener el TOKEN desde variables de entorno (para mayor seguridad en Render)
+TOKEN = os.getenv(""7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-")
 
 # Lista de preguntas y respuestas correctas
 questions = {
@@ -37,7 +37,7 @@ async def start(update: Update, context: CallbackContext) -> None:
     """Envía un saludo y la primera pregunta."""
     chat_id = update.message.chat_id
     user_scores[chat_id] = {"score": 0, "index": 0}  # Inicializa el puntaje y el índice de preguntas
-    
+
     greeting = "Hola, mi nombre es PlasmaBot. Bienvenido a este espacio donde yo seré tu asistente virtual y juntos resolveremos todas las dudas que tengas al respecto."
     await update.message.reply_text(greeting)
     await send_question(update, context, chat_id)
@@ -45,12 +45,12 @@ async def start(update: Update, context: CallbackContext) -> None:
 async def send_question(update: Update, context: CallbackContext, chat_id: int) -> None:
     """Envía la siguiente pregunta."""
     user_data = user_scores.get(chat_id)
-    
+
     question_list = list(questions.keys())
     if user_data["index"] >= len(question_list):
         await update.message.reply_text(f"🎉 ¡Examen terminado! Tu puntaje es {user_data['score']} de {len(questions)}.")
         return
-    
+
     question_text = question_list[user_data["index"]]
     await context.bot.send_message(chat_id=chat_id, text=question_text)
 
@@ -58,15 +58,15 @@ async def receive_answer(update: Update, context: CallbackContext) -> None:
     """Recibe y evalúa la respuesta del usuario."""
     chat_id = update.message.chat_id
     user_data = user_scores.get(chat_id)
-    
+
     if not user_data:
         await update.message.reply_text("Por favor, usa /start para comenzar el examen.")
         return
-    
+
     question_list = list(questions.keys())
     correct_answer = questions[question_list[user_data["index"]]]
     user_answer = update.message.text
-    
+
     result = check_answer(user_answer, correct_answer)
     if result == "correcto":
         user_data["score"] += 1
@@ -75,17 +75,18 @@ async def receive_answer(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text(f"⚠️ Parcialmente correcto. Considera esta respuesta: {correct_answer}")
     else:
         await update.message.reply_text(f"❌ Incorrecto. Una posible respuesta sería: {correct_answer}")
-    
+
     user_data["index"] += 1  # Avanza a la siguiente pregunta
     await send_question(update, context, chat_id)
 
 # Configuración del bot
 def main():
     application = Application.builder().token(TOKEN).build()
-    
+
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, receive_answer))  # Maneja respuestas abiertas
-    
+
+    print("✅ Bot iniciado correctamente")
     application.run_polling()
 
 # Ejecutar main directamente
