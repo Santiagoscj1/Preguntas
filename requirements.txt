@@ -2,3 +2,4 @@ python-dotenv==0.21.1  # Si usas variables de entorno
 requests==2.28.1  # Si haces peticiones HTTP
 python-telegram-bot==20.8
 Flask==3.1.0
+python-telegram-bot[webhooks]
