@@ -1,8 +1,8 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CommandHandler, CallbackQueryHandler, Application, ContextTypes
+from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, filters, Application, ContextTypes
 import os
 
-# TOKEN del bot (se recomienda usar variable de entorno)
+# TOKEN del bot (recomendado usar variable de entorno)
 TOKEN = os.getenv("TELEGRAM_TOKEN", "7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M")
 
 # Preguntas y respuestas con IDs cortos
@@ -29,7 +29,7 @@ questions = {
             "Es un procedimiento en el que se extraen plaquetas de un donante mediante aféresis para ayudar a pacientes necesitados.")
 }
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def show_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Muestra el menú de preguntas como botones."""
     keyboard = [
         [InlineKeyboardButton(text=question, callback_data=qid)]
@@ -42,9 +42,35 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "Hola, soy *PlasmaBot* 🩸\n\n"
         "Selecciona una pregunta sobre la donación de plaquetas y te daré la respuesta:"
     )
-    await update.message.reply_text(greeting, reply_markup=reply_markup, parse_mode="Markdown")
+    if update.message:
+        await update.message.reply_text(greeting, reply_markup=reply_markup, parse_mode="Markdown")
+    elif update.callback_query:  # Por si lo llamas desde otro lado
+        await update.callback_query.message.reply_text(greeting, reply_markup=reply_markup, parse_mode="Markdown")
 
+async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Muestra la respuesta a la pregunta seleccionada."""
+    query = update.callback_query
+    await query.answer()
+
+    qid = query.data
+    question, answer = questions.get(qid, ("Pregunta no encontrada", "No tengo una respuesta para eso."))
+
+    await query.edit_message_text(f"*{question}*\n\n{answer}", parse_mode="Markdown")
+
+def main():
+    application = Application.builder().token(TOKEN).build()
+
+    # Cuando el usuario manda cualquier mensaje, se activa el menú
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, show_menu))
+    
+    # Sigue funcionando /start si lo desean usar también
+    application.add_handler(CommandHandler("start", show_menu))
+    
+    # Manejo de selección de preguntas
+    application.add_handler(CallbackQueryHandler(handle_question))
+
+    print("✅ Bot iniciado correctamente")
+    application.run_polling()
 
 if __name__ == "__main__":
     main()
-
