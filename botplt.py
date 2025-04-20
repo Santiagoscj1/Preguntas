@@ -1,9 +1,9 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, filters, Application, ContextTypes
+from telegram.ext import CommandHandler, CallbackQueryHandler, Application, ContextTypes
 import os
 
-# TOKEN del bot (recomendado usar variable de entorno)
-TOKEN = os.getenv("TELEGRAM_TOKEN", "7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M")
+# Tu TOKEN del bot
+TOKEN = "7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M"
 
 # Preguntas y respuestas con IDs cortos
 questions = {
@@ -42,10 +42,7 @@ async def show_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "Hola, soy *PlasmaBot* 🩸\n\n"
         "Selecciona una pregunta sobre la donación de plaquetas y te daré la respuesta:"
     )
-    if update.message:
-        await update.message.reply_text(greeting, reply_markup=reply_markup, parse_mode="Markdown")
-    elif update.callback_query:  # Por si lo llamas desde otro lado
-        await update.callback_query.message.reply_text(greeting, reply_markup=reply_markup, parse_mode="Markdown")
+    await update.message.reply_text(greeting, reply_markup=reply_markup, parse_mode="Markdown")
 
 async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Muestra la respuesta a la pregunta seleccionada."""
@@ -58,19 +55,19 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await query.edit_message_text(f"*{question}*\n\n{answer}", parse_mode="Markdown")
 
 def main():
+    """Configuración del Webhook y el bot."""
     application = Application.builder().token(TOKEN).build()
 
-    # Cuando el usuario manda cualquier mensaje, se activa el menú
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, show_menu))
-    
-    # Sigue funcionando /start si lo desean usar también
-    application.add_handler(CommandHandler("start", show_menu))
-    
-    # Manejo de selección de preguntas
-    application.add_handler(CallbackQueryHandler(handle_question))
+    # URL de tu aplicación en Render
+    webhook_url = "https://preguntas-0pvx.onrender.com/" + TOKEN
 
-    print("✅ Bot iniciado correctamente")
-    application.run_polling()
+    application.run_webhook(
+        listen="0.0.0.0",  # Acepta conexiones externas
+        port=8080,  # Puerto común para las aplicaciones en Render
+        url_path=TOKEN,  # Token del bot
+        webhook_url=webhook_url  # URL del webhook que se usará
+    )
 
 if __name__ == "__main__":
     main()
+
