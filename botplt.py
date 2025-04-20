@@ -1,6 +1,5 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, CallbackQueryHandler, Application, ContextTypes
-import os
 
 # Tu TOKEN del bot
 TOKEN = "7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M"
@@ -55,17 +54,17 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await query.edit_message_text(f"*{question}*\n\n{answer}", parse_mode="Markdown")
 
 def main():
-    """Configuración del Webhook y el bot."""
+    """Configuración del bot con long polling"""
     application = Application.builder().token(TOKEN).build()
 
-    # URL de tu aplicación en Render
-    webhook_url = "https://preguntas-0pvx.onrender.com/7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M" 
-        listen="0.0.0.0",  # Acepta conexiones externas
-        port=8080,  # Puerto común para las aplicaciones en Render
-        url_path=TOKEN,  # Token del bot
-        webhook_url=webhook_url  # URL del webhook que se usará
-    )
+    # Se agrega el comando de inicio del menú
+    application.add_handler(CommandHandler("start", show_menu))
+
+    # Se maneja la respuesta de las preguntas
+    application.add_handler(CallbackQueryHandler(handle_question))
+
+    # Inicia el bot con long polling (sin webhook)
+    application.run_polling()
 
 if __name__ == "__main__":
     main()
-
