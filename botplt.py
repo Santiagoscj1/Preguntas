@@ -59,9 +59,7 @@ def main():
     application = Application.builder().token(TOKEN).build()
 
     # URL de tu aplicación en Render
-    webhook_url = "https://preguntas-0pvx.onrender.com/" + TOKEN
-
-    application.run_webhook(
+    webhook_url = "https://preguntas-0pvx.onrender.com/7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M" 
         listen="0.0.0.0",  # Acepta conexiones externas
         port=8080,  # Puerto común para las aplicaciones en Render
         url_path=TOKEN,  # Token del bot
