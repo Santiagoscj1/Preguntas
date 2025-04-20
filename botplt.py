@@ -44,14 +44,29 @@ async def show_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(greeting, reply_markup=reply_markup, parse_mode="Markdown")
 
 async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Muestra la respuesta a la pregunta seleccionada."""
+    """Muestra la respuesta a la pregunta seleccionada y luego las demás preguntas."""
     query = update.callback_query
     await query.answer()
 
     qid = query.data
     question, answer = questions.get(qid, ("Pregunta no encontrada", "No tengo una respuesta para eso."))
 
+    # Muestra la respuesta seleccionada
     await query.edit_message_text(f"*{question}*\n\n{answer}", parse_mode="Markdown")
+
+    # Muestra las demás preguntas
+    keyboard = [
+        [InlineKeyboardButton(text=question, callback_data=qid)]
+        for qid, (question, _) in questions.items() if qid != query.data
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Mensaje para mostrar las otras preguntas
+    await query.message.reply_text(
+        "Selecciona otra pregunta para obtener más información:",
+        reply_markup=reply_markup,
+        parse_mode="Markdown"
+    )
 
 def main():
     """Configuración del bot con long polling"""
