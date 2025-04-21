@@ -56,29 +56,24 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     # Muestra las demás preguntas
     keyboard = [
-        [InlineKeyboardButton(text=question, callback_data=qid)]
-        for qid, (question, _) in questions.items() if qid != query.data
+        [InlineKeyboardButton(text=q, callback_data=qid)]
+        for qid, (q, _) in questions.items()
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Mensaje para mostrar las otras preguntas
     await query.message.reply_text(
-        "Selecciona otra pregunta para obtener más información:",
+        "Selecciona otra pregunta para seguir aprendiendo:",
         reply_markup=reply_markup,
         parse_mode="Markdown"
     )
 
 def main():
-    """Configuración del bot con long polling"""
     application = Application.builder().token(TOKEN).build()
 
-    # Se agrega el comando de inicio del menú
     application.add_handler(CommandHandler("start", show_menu))
-
-    # Se maneja la respuesta de las preguntas
     application.add_handler(CallbackQueryHandler(handle_question))
 
-    # Inicia el bot con long polling (sin webhook)
+    # 🔁 Usamos polling, no webhooks (ideal para Render como Worker)
     application.run_polling()
 
 if __name__ == "__main__":
