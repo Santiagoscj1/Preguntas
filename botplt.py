@@ -1,12 +1,11 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, CallbackQueryHandler, Application, ContextTypes
-import os
 import asyncio
 
-# Tu TOKEN del bot
+# Token de tu bot
 TOKEN = "7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M"
 
-# Preguntas y respuestas con IDs cortos
+# Diccionario de preguntas y respuestas
 questions = {
     "q1": ("¿Qué son las plaquetas y cuál es su función en la sangre?",
            "Son fragmentos celulares que ayudan en la coagulación de la sangre."),
@@ -30,8 +29,8 @@ questions = {
             "Es un procedimiento en el que se extraen plaquetas de un donante mediante aféresis para ayudar a pacientes necesitados.")
 }
 
+# Mostrar menú
 async def show_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Muestra el menú de preguntas como botones."""
     keyboard = [
         [InlineKeyboardButton(text=question, callback_data=qid)]
         for qid, (question, _) in questions.items()
@@ -45,18 +44,17 @@ async def show_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
     await update.message.reply_text(greeting, reply_markup=reply_markup, parse_mode="Markdown")
 
+# Manejar respuesta
 async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Muestra la respuesta a la pregunta seleccionada."""
     query = update.callback_query
     await query.answer()
 
     qid = query.data
     question, answer = questions.get(qid, ("Pregunta no encontrada", "No tengo una respuesta para eso."))
 
-    # Muestra la respuesta y vuelve a mostrar el menú
     await query.edit_message_text(f"*{question}*\n\n{answer}", parse_mode="Markdown")
 
-    # Reenviar el menú de nuevo
+    # Volver a mostrar el menú
     await query.message.reply_text(
         "¿Te gustaría saber algo más? Selecciona otra pregunta:",
         reply_markup=InlineKeyboardMarkup([
@@ -65,16 +63,17 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         ])
     )
 
+# Configuración principal
 def main():
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", show_menu))
     application.add_handler(CallbackQueryHandler(handle_question))
 
-    # 🔥 Eliminar el webhook para evitar conflicto con polling
+    # 🔥 Eliminar webhook para evitar conflictos con polling
     asyncio.run(application.bot.delete_webhook(drop_pending_updates=True))
 
-    # 🔁 Iniciar con polling (modo Worker en Render)
+    # 🔁 Iniciar en modo polling (para Render como worker)
     application.run_polling()
 
 if __name__ == "__main__":
