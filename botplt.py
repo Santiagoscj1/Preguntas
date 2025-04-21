@@ -1,14 +1,15 @@
-import logging
-
-logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
-logging.info("Bot de Telegram iniciado correctamente.")
-
-
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CommandHandler, CallbackQueryHandler, Application, ContextTypes
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+import os
 import logging
+import asyncio
 
-# Token de tu bot
+# Habilitar logging para facilitar la depuración
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Tu Token de Telegram
 TOKEN = "7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M"
 
 # Diccionario de preguntas y respuestas
@@ -35,8 +36,8 @@ questions = {
             "Es un procedimiento en el que se extraen plaquetas de un donante mediante aféresis para ayudar a pacientes necesitados.")
 }
 
-# Mostrar menú
 async def show_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Muestra el menú con las preguntas disponibles como botones."""
     keyboard = [
         [InlineKeyboardButton(text=question, callback_data=qid)]
         for qid, (question, _) in questions.items()
@@ -50,8 +51,8 @@ async def show_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
     await update.message.reply_text(greeting, reply_markup=reply_markup, parse_mode="Markdown")
 
-# Manejar respuesta
 async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Maneja la selección de una pregunta y muestra la respuesta."""
     query = update.callback_query
     await query.answer()
 
@@ -60,7 +61,7 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     await query.edit_message_text(f"*{question}*\n\n{answer}", parse_mode="Markdown")
 
-    # Volver a mostrar el menú
+    # Volver a mostrar el menú después de responder
     await query.message.reply_text(
         "¿Te gustaría saber algo más? Selecciona otra pregunta:",
         reply_markup=InlineKeyboardMarkup([
@@ -69,20 +70,24 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         ])
     )
 
-# Configuración principal
-async def main() -> None:
+async def set_webhook(application: Application) -> None:
+    """Configura el webhook para el bot de Telegram en lugar de usar polling."""
+    webhook_url = "https://preguntas-0pvx.onrender.com/" + TOKEN
+    await application.bot.set_webhook(webhook_url)
+
+def main():
+    """Configuración principal del bot."""
     application = Application.builder().token(TOKEN).build()
 
+    # Agregar los controladores
     application.add_handler(CommandHandler("start", show_menu))
     application.add_handler(CallbackQueryHandler(handle_question))
 
-    # Eliminar webhook para evitar conflictos con polling
-    await application.bot.delete_webhook(drop_pending_updates=True)
+    # Configurar webhook para usar en Render
+    asyncio.run(set_webhook(application))
 
-    # Iniciar en modo polling (para Render como worker)
-    await application.run_polling()
+    # Iniciar el bot
+    application.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
-    # Aquí no se necesita `asyncio.run()`. Simplemente iniciamos la función `main()` de forma asíncrona.
-    import asyncio
-    asyncio.get_event_loop().run_until_complete(main())
+    main()
