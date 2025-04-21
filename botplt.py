@@ -64,19 +64,19 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     )
 
 # Configuración principal
-async def main():
+async def main() -> None:
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", show_menu))
     application.add_handler(CallbackQueryHandler(handle_question))
 
-    # 🔥 Eliminar webhook para evitar conflictos con polling
+    # Eliminar webhook para evitar conflictos con polling
     await application.bot.delete_webhook(drop_pending_updates=True)
 
-    # 🔁 Iniciar en modo polling (para Render como worker)
+    # Iniciar en modo polling (para Render como worker)
     await application.run_polling()
 
 if __name__ == "__main__":
-    # Iniciar la aplicación de manera correcta en modo asincrónico
+    # Aquí no se necesita `asyncio.run()`. Simplemente iniciamos la función `main()` de forma asíncrona.
     import asyncio
-    asyncio.run(main())
+    asyncio.get_event_loop().run_until_complete(main())
