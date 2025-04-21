@@ -1,6 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, CallbackQueryHandler, Application, ContextTypes
-import asyncio
+import logging
 
 # Token de tu bot
 TOKEN = "7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M"
@@ -64,17 +64,19 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     )
 
 # Configuración principal
-def main():
+async def main():
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", show_menu))
     application.add_handler(CallbackQueryHandler(handle_question))
 
     # 🔥 Eliminar webhook para evitar conflictos con polling
-    asyncio.run(application.bot.delete_webhook(drop_pending_updates=True))
+    await application.bot.delete_webhook(drop_pending_updates=True)
 
     # 🔁 Iniciar en modo polling (para Render como worker)
-    application.run_polling()
+    await application.run_polling()
 
 if __name__ == "__main__":
-    main()
+    # Iniciar la aplicación de manera correcta en modo asincrónico
+    import asyncio
+    asyncio.run(main())
