@@ -2,7 +2,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, MessageHandler, filters, CallbackQueryHandler, ContextTypes
 import asyncio
 
-TOKEN = "TU_TOKEN_AQUI"  # 🔁 Reemplaza por tu token
+TOKEN = "7749919832:AAGeUSe3Us1Pc2exRjw59172Z2W-MbRpw6M"  # 🔁 Reemplaza por tu token
 
 # Diccionario de preguntas y respuestas
 questions = {
